@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Informações</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff; /* Fundo azul claro */
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background-color: #ffffff; /* Fundo branco para o conteúdo */
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #007acc; /* Azul claro mais escuro para os títulos */
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #007acc;
+        }
+
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #007acc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007acc; /* Botão azul claro */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #005f99; /* Efeito hover no botão */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Adicionar Informações do Local</h1>
+        <form id="formInformacao">
+            <label for="informacao">Informação:</label>
+            <textarea id="informacao" rows="4" required></textarea>
+            <button type="submit">Salvar Informações</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('formInformacao').onsubmit = function(event) {
+            event.preventDefault(); // Impede o envio padrão do formulário
+
+            const informacao = document.getElementById('informacao').value;
+            const posicao = JSON.parse(localStorage.getItem('posicao'));
+            const marcadores = JSON.parse(localStorage.getItem('marcadores')) || [];
+
+            // Adiciona a informação ao marcador
+            if (posicao) {
+                marcadores.push({ x: posicao.x, y: posicao.y, informacao: informacao });
+                localStorage.setItem('marcadores', JSON.stringify(marcadores));
+                
+                // Notificação de sucesso
+                alert('Informação salva com sucesso!');
+            } else {
+                alert('Nenhuma posição encontrada.'); // Feedback se não houver posição
+            }
+
+            window.location.href = 'index.html'; // Retorna à página principal
+        };
+    </script>
+</body>
+</html>

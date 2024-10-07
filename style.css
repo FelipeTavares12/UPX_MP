@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcar Acessos para Deficientes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f8ff; /* Fundo azul claro */
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff; /* Fundo branco para o conteúdo */
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #007acc; /* Azul claro mais escuro para os títulos */
+        }
+        #mapa {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 200px); /* Ajusta a altura da imagem */
+            border: 2px solid #007acc; /* Bordas azul claro */
+            border-radius: 8px;
+            cursor: crosshair;
+        }
+        .marcador {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #ff6347; /* Um tom de vermelho para maior contraste */
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        .rótulo {
+            position: absolute;
+            background-color: #e0f7fa; /* Fundo azul muito claro */
+            border: 1px solid #007acc; /* Borda azul */
+            padding: 4px 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            transform: translate(-50%, -100%);
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .formulario {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #e0f7fa; /* Fundo azul claro para o formulário */
+            border-radius: 8px;
+            border: 1px solid #007acc;
+        }
+        label {
+            color: #007acc;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px 0;
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 4px;
+            border: 1px solid #007acc;
+        }
+        input {
+            background-color: #f0f8ff; /* Fundo azul claro para inputs */
+        }
+        button {
+            background-color: #007acc; /* Botão azul claro */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #005f99; /* Efeito hover no botão */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Marque os Locais de Acesso para Deficientes</h1>
+        <div id="mapa" onclick="adicionarMarcador(event)">
+            <img src="Upx.jpg" alt="Mapa" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        <div class="formulario">
+            <h2>Adicionar Local</h2>
+            <form id="formulario">
+                <label for="descricao">Nome do Local:</label>
+                <input type="text" id="descricao" name="descricao" required>
+                <button type="submit">Adicionar Local</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function adicionarMarcador(event) {
+            // Captura a posição do clique
+            const x = event.offsetX;
+            const y = event.offsetY;
+            
+            // Cria o marcador
+            const marcador = document.createElement('div');
+            marcador.className = 'marcador';
+            marcador.style.left = `${x}px`;
+            marcador.style.top = `${y}px`;
+            
+            // Cria o rótulo
+            const rotulo = document.createElement('div');
+            rotulo.className = 'rótulo';
+            rotulo.style.left = `${x}px`;
+            rotulo.style.top = `${y}px`;
+            rotulo.textContent = document.getElementById('descricao').value;
+            
+            // Adiciona o marcador e o rótulo ao mapa
+            const mapa = document.getElementById('mapa');
+            mapa.appendChild(marcador);
+            mapa.appendChild(rotulo);
+            
+            // Limpar o formulário após o clique no mapa
+            document.getElementById('formulario').reset();
+        }
+    </script>
+</body>
+</html>

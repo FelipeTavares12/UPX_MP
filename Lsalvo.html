@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="android-chrome-512x512.png" type="image/x-icon">
+    <title>Locais Salvos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f8ff; /* Fundo azul claro */
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff; /* Fundo branco para o conteúdo */
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #007acc; /* Azul claro mais escuro para os títulos */
+            text-align: center; /* Centraliza o título */
+        }
+        #mapa {
+            position: relative;
+            width: 100%;
+            height: 800px; /* Altura aumentada para o mapa */
+            border: 2px solid #007acc; /* Bordas azul claro */
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .marcador {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #ff6347; /* Cor do arco */
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        .rótulo {
+            position: absolute;
+            background-color: #e0f7fa; /* Fundo azul muito claro */
+            border: 1px solid #007acc; /* Borda azul */
+            padding: 4px 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            transform: translate(-50%, -100%);
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .voltar {
+            display: block;
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #007acc; /* Botão azul claro */
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            border: 1px solid #007acc;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .voltar:hover {
+            background-color: #005f99; /* Efeito hover no botão */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Locais Salvos</h1>
+        <div id="mapa">
+            <img src="Upx.jpg" alt="Mapa" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        <a href="index.html" class="voltar">Voltar</a> <!-- Botão de voltar -->
+    </div>
+
+    <script>
+        function carregarMarcadores() {
+            const marcadoresSalvos = JSON.parse(localStorage.getItem('marcadores')) || [];
+            marcadoresSalvos.forEach(m => {
+                const arco = document.createElement('div');
+                arco.className = 'marcador';
+                arco.style.left = `${m.x - 15}px`;
+                arco.style.top = `${m.y - 15}px`;
+
+                const rotulo = document.createElement('div');
+                rotulo.className = 'rótulo';
+                rotulo.style.left = `${m.x}px`;
+                rotulo.style.top = `${m.y - 20}px`;
+                rotulo.textContent = m.descricao;
+
+                const mapa = document.getElementById('mapa');
+                mapa.appendChild(arco);
+                mapa.appendChild(rotulo);
+            });
+        }
+
+        // Carregar os marcadores ao carregar a página
+        window.onload = carregarMarcadores;
+    </script>
+</body>
+</html>

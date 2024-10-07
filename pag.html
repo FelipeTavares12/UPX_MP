@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="android-chrome-512x512.png" type="image/x-icon">
+    <title>UPX - Smart Cities</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f8ff; /* Fundo azul claro */
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff; /* Fundo branco para o conteúdo */
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #007acc; /* Azul claro mais escuro para os títulos */
+            text-align: center; /* Centraliza o título */
+        }
+        #mapa {
+            position: relative;
+            width: 100%;
+            height: 800px; /* Altura aumentada para o mapa */
+            border: 2px solid #007acc; /* Bordas azul claro */
+            border-radius: 8px;
+            cursor: crosshair;
+            overflow: hidden;
+        }
+        .marcador {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #ff6347; /* Cor do arco padrão */
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        .interditado {
+            border-color: #8b0000; /* Cor para áreas interditadas */
+        }
+        .rótulo {
+            position: absolute;
+            background-color: #e0f7fa; /* Fundo azul muito claro */
+            border: 1px solid #007acc; /* Borda azul */
+            padding: 4px 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            transform: translate(-50%, -100%);
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .informacao {
+            position: absolute;
+            background-color: #fff; /* Fundo branco */
+            border: 1px solid #007acc; /* Borda azul */
+            padding: 4px 8px;
+            font-size: 12px;
+            display: none; /* Inicialmente invisível */
+            white-space: nowrap;
+            transform: translate(-50%, -100%);
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .formulario {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #e0f7fa; /* Fundo azul claro para o formulário */
+            border-radius: 8px;
+            border: 1px solid #007acc;
+        }
+        label {
+            color: #007acc;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px 0;
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 4px;
+            border: 1px solid #007acc;
+        }
+        input {
+            background-color: #f0f8ff; /* Fundo azul claro para inputs */
+        }
+        button {
+            background-color: #007acc; /* Botão azul claro */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #005f99; /* Efeito hover no botão */
+        }
+        .apagar {
+            background-color: #ff6347; /* Botão vermelho para apagar */
+            color: white;
+        }
+        .apagar:hover {
+            background-color: #cc0000; /* Efeito hover no botão de apagar */
+        }
+        .ver-salvos {
+            background-color: #007acc; /* Botão azul claro para ver locais salvos */
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 4px;
+            border: 1px solid #007acc;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+        .ver-salvos:hover {
+            background-color: #005f99; /* Efeito hover no botão de ver salvos */
+        }
+        .highlight {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 2px dashed #32cd32; /* Cor do contorno dos prédios */
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Marque os Locais de Acesso</h1>
+        <div id="mapa" onmousemove="mostrarHighlight(event)" onclick="prepararMarcador(event)">
+            <img src="Upx.jpg" alt="Mapa" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        <div class="formulario">
+            <h2>Adicionar Local</h2>
+            <form id="formulario">
+                <label for="descricao">Nome do Local:</label>
+                <input type="text" id="descricao" name="descricao" required>
+                <label for="tipo">Tipo de Local:</label>
+                <select id="tipo">
+                    <option value="normal">Normal</option>
+                    <option value="interditado">Interditado</option>
+                </select>
+                <button type="submit">Adicionar Local</button>
+                <button type="button" class="apagar" onclick="apagarUltimoMarcador()">Apagar Último Marcador</button>
+                <button type="button" class="apagar" onclick="apagarTodosMarcadores()">Apagar Todos Marcadores</button>
+                <button type="button" onclick="adicionarInformacao()">Adicionar Informação ao Último Local</button>
+            </form>
+        </div>
+        <a href="Lsalvo.html" class="ver-salvos">Ver Locais Salvos</a>
+    </div>
+
+    <script>
+        const marcadores = []; // Armazena todos os marcadores adicionados
+        let highlight = null; // Contorno para os prédios
+
+        function prepararMarcador(event) {
+            const x = event.offsetX;
+            const y = event.offsetY;
+            const tipo = document.getElementById('tipo').value;
+
+            // Cria o arco com base no tipo de marcador
+            const arco = document.createElement('div');
+            arco.className = tipo === 'interditado' ? 'marcador interditado' : 'marcador';
+            arco.style.left = `${x - 15}px`; // Ajusta para centralizar
+            arco.style.top = `${y - 15}px`; // Ajusta para centralizar
+
+            // Cria o rótulo
+            const rotulo = document.createElement('div');
+            rotulo.className = 'rótulo';
+            rotulo.style.left = `${x}px`;
+            rotulo.style.top = `${y - 20}px`;
+            rotulo.textContent = document.getElementById('descricao').value;
+
+            // Cria a informação adicional (inicialmente invisível)
+            const informacao = document.createElement('div');
+            informacao.className = 'informacao';
+            informacao.style.left = `${x}px`;
+            informacao.style.top = `${y - 50}px`; // Um pouco acima do rótulo
+            informacao.textContent = ''; // Inicialmente vazio
+
+            // Adiciona o marcador, rótulo e informação ao mapa
+            const mapa = document.getElementById('mapa');
+            mapa.appendChild(arco);
+            mapa.appendChild(rotulo);
+            mapa.appendChild(informacao);
+
+            // Armazena o marcador, rótulo e informação no array
+            marcadores.push({ arco, rotulo, informacao, x, y, descricao: document.getElementById('descricao').value });
+
+            // Salva os dados no localStorage
+            salvarMarcadores();
+
+            // Reseta o formulário
+            document.getElementById('formulario').reset();
+        }
+
+        document.getElementById('formulario').onsubmit = function(event) {
+            event.preventDefault();
+            // Resetar o formulário após o clique no botão
+            prepararMarcador(event);
+        };
+
+        function adicionarInformacao() {
+            const ultima = marcadores[marcadores.length - 1];
+            if (ultima) {
+                const informacao = prompt("Digite a informação adicional para este local:");
+                if (informacao) {
+                    ultima.informacao.textContent = informacao; // Adiciona a informação
+                    ultima.informacao.style.display = 'block'; // Torna visível
+                }
+            } else {
+                alert("Nenhum local salvo para adicionar informações.");
+            }
+        }
+
+        function mostrarHighlight(event) {
+            if (!highlight) {
+                highlight = document.createElement('div');
+                highlight.className = 'highlight';
+                document.getElementById('mapa').appendChild(highlight);
+            }
+            highlight.style.left = `${event.offsetX - 50}px`;
+            highlight.style.top = `${event.offsetY - 50}px`;
+        }
+
+        function apagarUltimoMarcador() {
+            if (marcadores.length > 0) {
+                const ultimo = marcadores.pop();
+                ultimo.arco.remove();
+                ultimo.rotulo.remove();
+                ultimo.informacao.remove();
+                // Atualiza o localStorage após remover
+                salvarMarcadores();
+            }
+        }
+
+        function apagarTodosMarcadores() {
+            marcadores.forEach(marcador => {
+                marcador.arco.remove();
+                marcador.rotulo.remove();
+                marcador.informacao.remove();
+            });
+            marcadores.length = 0; // Limpa o array
+            // Atualiza o localStorage após remover
+            salvarMarcadores();
+        }
+
+        function salvarMarcadores() {
+            const dados = marcadores.map(m => ({
+                x: m.x,
+                y: m.y,
+                descricao: m.descricao,
+                informacao: m.informacao.textContent
+            }));
+            localStorage.setItem('marcadores', JSON.stringify(dados));
+        }
+
+        function carregarMarcadores() {
+            const dados = JSON.parse(localStorage.getItem('marcadores')) || [];
+            dados.forEach(dado => {
+                const arco = document.createElement('div');
+                arco.className = 'marcador';
+                arco.style.left = `${dado.x - 15}px`;
+                arco.style.top = `${dado.y - 15}px`;
+                const rotulo = document.createElement('div');
+                rotulo.className = 'rótulo';
+                rotulo.style.left = `${dado.x}px`;
+                rotulo.style.top = `${dado.y - 20}px`;
+                rotulo.textContent = dado.descricao;
+                const informacao = document.createElement('div');
+                informacao.className = 'informacao';
+                informacao.style.left = `${dado.x}px`;
+                informacao.style.top = `${dado.y - 50}px`;
+                informacao.textContent = dado.informacao; // Carrega a informação
+                informacao.style.display = informacao.textContent ? 'block' : 'none'; // Mostra se houver informação
+
+                const mapa = document.getElementById('mapa');
+                mapa.appendChild(arco);
+                mapa.appendChild(rotulo);
+                mapa.appendChild(informacao);
+                marcadores.push({ arco, rotulo, informacao, x: dado.x, y: dado.y, descricao: dado.descricao });
+            });
+        }
+
+        window.onload = carregarMarcadores; // Carrega marcadores ao iniciar
+    </script>
+</body>
+</html>
